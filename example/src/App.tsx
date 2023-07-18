@@ -25,16 +25,16 @@ import Details from './Details';
 import {
   OtelWrapper,
   startNavigationTracking,
-} from '@splunk/otel-react-native';
-import type { ReactNativeConfiguration } from '@splunk/otel-react-native';
+} from '@hyperdx/otel-react-native';
+import type { ReactNativeConfiguration } from '@hyperdx/otel-react-native';
 import Config from 'react-native-config';
 
 const RumConfig: ReactNativeConfiguration = {
   //TODO fix config setting for iOS in inegration tests
-  beaconEndpoint: Config.BEACON_ENDPOINT || 'http://localhost:53820/zipkindump',
-  applicationName: 'RnExample',
   allowInsecureBeacon: true,
-  rumAccessToken: '',
+  beaconEndpoint: Config.BEACON_ENDPOINT || 'http://localhost:53820/zipkindump',
+  service: 'RnExample',
+  apiKey: '',
   debug: true,
   globalAttributes: {
     globalAttr1: '42',

@@ -17,7 +17,7 @@ limitations under the License.
 import React, { useEffect } from 'react';
 import type { PropsWithChildren } from 'react';
 import type { ReactNativeConfiguration } from './splunkRum';
-import { SplunkRum } from './splunkRum';
+import { HyperDXRum } from './splunkRum';
 
 type Props = PropsWithChildren<{
   configuration: ReactNativeConfiguration;
@@ -27,11 +27,11 @@ let isInitialized = false;
 
 export const OtelWrapper: React.FC<Props> = ({ children, configuration }) => {
   useEffect(() => {
-    SplunkRum.finishAppStart();
+    HyperDXRum.finishAppStart();
   }, []);
 
   if (!isInitialized) {
-    SplunkRum.init(configuration);
+    HyperDXRum.init(configuration);
     isInitialized = true;
   } else {
     console.log('Already initialized');

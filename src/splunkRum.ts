@@ -23,9 +23,10 @@ import {
   DiagConsoleLogger,
   DiagLogLevel,
 } from '@opentelemetry/api';
-import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
+import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
 import { _globalThis } from '@opentelemetry/core';
+
 import {
   initializeNativeSdk,
   NativeSdKConfiguration,
@@ -43,10 +44,9 @@ import { getSessionId, _generatenewSessionId } from './session';
 import { Platform } from 'react-native';
 
 export interface ReactNativeConfiguration {
-  realm?: string;
   beaconEndpoint?: string;
-  rumAccessToken: string;
-  applicationName: string;
+  apiKey: string;
+  service: string;
   deploymentEnvironment?: string;
   allowInsecureBeacon?: boolean;
   appStartEnabled?: boolean;
@@ -64,13 +64,15 @@ export interface ReactNativeConfiguration {
    * also not be traced.
    */
   ignoreUrls?: Array<string | RegExp>;
+
+  tracePropagationTargets?: (string | RegExp)[];
 }
 
-export interface SplunkRumType {
+export interface HyperDXRumType {
   appStartSpan?: Span | undefined;
   appStartEnd: number | null;
   finishAppStart: () => void;
-  init: (options: ReactNativeConfiguration) => SplunkRumType | undefined;
+  init: (options: ReactNativeConfiguration) => HyperDXRumType | undefined;
   provider?: WebTracerProvider;
   _generatenewSessionId: () => void;
   _testNativeCrash: () => void;
@@ -87,7 +89,7 @@ const DEFAULT_CONFIG = {
 let appStartInfo: AppStartInfo | null = null;
 let isInitialized = false;
 
-export const SplunkRum: SplunkRumType = {
+export const HyperDXRum: HyperDXRumType = {
   appStartEnd: null,
   finishAppStart() {
     if (this.appStartSpan && this.appStartSpan.isRecording()) {
@@ -118,25 +120,25 @@ export const SplunkRum: SplunkRumType = {
     }
 
     const clientInit = Date.now();
-    if (!config.applicationName) {
-      diag.error('applicationName name is required.');
+    if (!config.service) {
+      diag.error('service name is required.');
       return;
     }
 
-    if (!config.realm && !config.beaconEndpoint) {
-      diag.error('Either realm or beaconEndpoint is required.');
-      return;
-    }
-
-    if (config.realm && !config.rumAccessToken) {
-      diag.error('When sending data to Splunk rumAccessToken is required.');
+    if (!config.apiKey) {
+      diag.error('When sending data to HyperDX apiKey is required.');
       return;
     }
 
     const nativeSdkConf: NativeSdKConfiguration = {};
-    if (config.realm) {
-      nativeSdkConf.beaconEndpoint = `https://rum-ingest.${config.realm}.signalfx.com/v1/rum`;
-    }
+
+    // TODO: eventually we want to migrate to native OTLP exporter
+    nativeSdkConf.beaconEndpoint =
+      'https://in-otel.hyperdx.io:9411/api/v2/spans';
+    nativeSdkConf.enableDiskBuffering = config.enableDiskBuffering;
+    nativeSdkConf.limitDiskUsageMegabytes = config.limitDiskUsageMegabytes;
+    nativeSdkConf.apiKey = config.apiKey;
+    nativeSdkConf.globalAttributes = { ...getResource() };
 
     if (config.beaconEndpoint) {
       if (
@@ -148,18 +150,8 @@ export const SplunkRum: SplunkRumType = {
         );
         return;
       }
-      if (config.realm) {
-        diag.warn(
-          'SplunkRum: Realm value ignored (beaconEndpoint has been specified)'
-        );
-      }
       nativeSdkConf.beaconEndpoint = config.beaconEndpoint;
     }
-
-    nativeSdkConf.rumAccessToken = config.rumAccessToken;
-    nativeSdkConf.enableDiskBuffering = config.enableDiskBuffering;
-    nativeSdkConf.limitDiskUsageMegabytes = config.limitDiskUsageMegabytes;
-    nativeSdkConf.globalAttributes = { ...getResource() };
 
     addGlobalAttributesFromConf(config);
     const provider = new WebTracerProvider({});
@@ -174,16 +166,19 @@ export const SplunkRum: SplunkRumType = {
     this.provider = provider;
     const clientInitEnd = Date.now();
 
-    instrumentXHR({ ignoreUrls: config.ignoreUrls });
+    instrumentXHR({
+      ignoreUrls: config.ignoreUrls,
+      propagateTraceHeaderCorsUrls: config.tracePropagationTargets,
+    });
     instrumentErrors();
 
     const nativeInit = Date.now();
 
     diag.debug(
       'Initializing with: ',
-      config.applicationName,
+      config.service,
       nativeSdkConf.beaconEndpoint,
-      nativeSdkConf.rumAccessToken?.substring(0, 5),
+      nativeSdkConf.apiKey?.substring(0, 5),
       nativeSdkConf.enableDiskBuffering
     );
 
@@ -242,7 +237,16 @@ function addGlobalAttributesFromConf(config: ReactNativeConfiguration) {
   const confAttributes: Attributes = {
     ...config.globalAttributes,
   };
-  confAttributes.app = config.applicationName;
+  confAttributes.app = config.service;
+
+  // Attach __HDX_API_KEY
+  if (config.apiKey) {
+    confAttributes.__HDX_API_KEY = config.apiKey;
+  }
+
+  if (config.service) {
+    confAttributes['process.serviceName'] = config.service;
+  }
 
   if (config.deploymentEnvironment) {
     confAttributes['deployment.environment'] = config.deploymentEnvironment;

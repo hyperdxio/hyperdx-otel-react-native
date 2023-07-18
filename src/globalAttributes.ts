@@ -39,10 +39,10 @@ export function getResource(): ResourceAttributes {
     [SCREEN_NAME]: 'unknown',
     // ...SDK_INFO,
     [SemanticResourceAttributes.TELEMETRY_SDK_NAME]:
-      '@splunk/otel-react-native',
+      '@hyperdx/otel-react-native',
     [SemanticResourceAttributes.TELEMETRY_SDK_VERSION]: VERSION,
     // Splunk specific attributes
-    'splunk.rumVersion': VERSION,
+    'rum.version': VERSION,
   };
 
   if (Platform.OS === 'ios') {
@@ -65,7 +65,7 @@ globalAttributes = {
 };
 
 //currently used for:
-//splunk.rumSessionId
+// rum.sessionId
 //screen.name
 export function setGlobalAttributes(attrs: object) {
   globalAttributes = Object.assign(globalAttributes, attrs);
@@ -74,6 +74,6 @@ export function setGlobalAttributes(attrs: object) {
 
 export function getGlobalAttributes(): Attributes {
   return Object.assign(globalAttributes, {
-    'splunk.rumSessionId': getSessionId(),
+    'rum.sessionId': getSessionId(),
   });
 }

@@ -1,7 +1,7 @@
 {
-  "name": "@splunk/otel-react-native",
+  "name": "@hyperdx/otel-react-native",
   "version": "0.2.0",
-  "description": "Splunk distribution of Open Telemetry for react native.",
+  "description": "HyperDX distribution of Open Telemetry for react native.",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
   "types": "lib/typescript/index.d.ts",
@@ -31,23 +31,26 @@
     "typescript": "tsc --noEmit",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "prepare": "bob build",
+    "build": "bob build",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build",
     "bootstrap": "npm --prefix example install && npm --prefix example run pods",
-    "version:check": "node scripts/version-check.mjs"
+    "version:check": "node scripts/version-check.mjs",
+    "release": "npm run build && npx changeset publish && git push --follow-tags"
   },
   "keywords": [
     "react-native",
     "ios",
     "android"
   ],
-  "repository": "https://github.com/signalfx/splunk-otel-react-native",
-  "homepage": "https://github.com/signalfx/splunk-otel-react-native#readme",
-  "author": "Splunk Observability Instrumentals Team",
+  "repository": "https://github.com/hyperdxio/hyperdx-otel-react-native",
+  "homepage": "https://github.com/hyperdxio/hyperdx-otel-react-native#readme",
+  "author": "HyperDX Observability Instrumentals Team",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/signalfx/splunk-otel-react-native/issues"
+    "url": "https://github.com/hyperdxio/hyperdx-otel-react-native/issues"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.26.2",
     "@react-native-community/eslint-config": "^3.2.0",
     "@types/jest": "^29.5.5",
     "@types/react": "~18.2.25",
@@ -103,10 +106,15 @@
   "dependencies": {
     "@opentelemetry/api": "^1.4.1",
     "@opentelemetry/core": "^1.14.0",
+    "@opentelemetry/instrumentation-xml-http-request": "^0.41.0",
     "@opentelemetry/resources": "^1.14.0",
     "@opentelemetry/sdk-trace-base": "^1.14.0",
     "@opentelemetry/sdk-trace-web": "^1.14.0",
-    "@opentelemetry/semantic-conventions": "^1.14.0"
+    "@opentelemetry/semantic-conventions": "^1.14.0",
+    "react-native-performance": "^4.0.0",
+    "react-native-url-polyfill": "^2.0.0",
+    "react-native-user-agent": "^2.3.1",
+    "shimmer": "^1.2.1"
   },
   "publishConfig": {
     "access": "public"

@@ -17,8 +17,8 @@ limitations under the License.
 import React from 'react';
 import { StyleSheet, View, Button, Text } from 'react-native';
 import { trace, context } from '@opentelemetry/api';
-import { SplunkRum } from '@splunk/otel-react-native';
 import Config from 'react-native-config';
+import { HyperDXRum } from '@hyperdx/otel-react-native';
 
 export default function Home({ navigation }: { navigation: any }) {
   const tracer = trace.getTracer('home');
@@ -41,13 +41,14 @@ export default function Home({ navigation }: { navigation: any }) {
 
   const rnFetch = async () => {
     try {
-      const url = 'https://raw.githubusercontent.com/signalfx/splunk-otel-react-native/main/package.json';
+      const url =
+        'https://raw.githubusercontent.com/signalfx/splunk-otel-react-native/main/package.json';
       await fetch(url);
     } catch (error) {
       console.error(error);
     }
   };
-  
+
   const fetchJSON = async () => {
     try {
       const url = 'https://dog-api.kinduff.com/api/facts';
@@ -99,7 +100,7 @@ export default function Home({ navigation }: { navigation: any }) {
       <Button title="Workflow span" onPress={workflowSpan} />
       <Button
         title="New session"
-        onPress={SplunkRum._generatenewSessionId}
+        onPress={HyperDXRum._generatenewSessionId}
         accessibilityLabel="newSession"
         testID="newSession"
       />
@@ -107,7 +108,7 @@ export default function Home({ navigation }: { navigation: any }) {
         accessibilityLabel="crash"
         testID="crash"
         title="Crash"
-        onPress={SplunkRum._testNativeCrash}
+        onPress={HyperDXRum._testNativeCrash}
       />
       <Button
         title="JS error"

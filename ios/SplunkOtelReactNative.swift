@@ -43,7 +43,7 @@ class SplunkOtelReactNative: NSObject {
           return
       }
 
-      let auth = config["rumAccessToken"] as? String
+      let auth = config["apiKey"] as? String
 
       if auth == nil {
           reject("error", "Missing authentication token", nil)
@@ -52,7 +52,7 @@ class SplunkOtelReactNative: NSObject {
       var beaconWithAuth = beaconUrl!
       beaconWithAuth += "?auth=" + auth!
 
-      SpanFromDiskExport.start(spanDb: db, endpoint: beaconWithAuth)
+      SpanFromDiskExport.start(spanDb: db, auth: auth ?? "", endpoint: beaconWithAuth)
 
       resolve(["moduleStart": appStartTime.timeIntervalSince1970 * 1000])
     }
