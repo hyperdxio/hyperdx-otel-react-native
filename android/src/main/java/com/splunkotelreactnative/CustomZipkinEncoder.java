@@ -37,7 +37,7 @@ import zipkin2.internal.WriteBuffer;
  * correcting the span name here at encoding time.
  */
 class CustomZipkinEncoder implements BytesEncoder<Span> {
-    static final AttributeKey<String> SPLUNK_OPERATION_KEY = stringKey("_splunk_operation");
+    static final AttributeKey<String> SPLUNK_OPERATION_KEY = stringKey("_hyperdx_operation");
     private final WriteBuffer.Writer<Span> writer = new V2SpanWriter();
 
     @Override

@@ -67,16 +67,17 @@ fileprivate func shouldEraseSpans(_ response: URLResponse?) -> Bool {
     }
 }
 
-fileprivate func buildRequest(url: URL, data: Data) -> URLRequest {
+fileprivate func buildRequest(url: URL, auth: String, data: Data) -> URLRequest {
     var req = URLRequest(url: url)
     req.httpMethod = "POST"
     req.addValue("application/json", forHTTPHeaderField: "Content-Type")
+    req.addValue(auth, forHTTPHeaderField: "Authorization")
     req.httpBody = data
     return req
 }
 
 class SpanFromDiskExport {
-    @discardableResult static func start(spanDb: SpanDb, endpoint: String) -> (() -> Void) {
+    @discardableResult static func start(spanDb: SpanDb, auth: String, endpoint: String) -> (() -> Void) {
         guard let url = URL(string: endpoint) else {
             print("SpanFromDiskExport: malformed endpoint URL: \(endpoint)")
             return {}
@@ -121,7 +122,7 @@ class SpanFromDiskExport {
             }
 
             let payload = preparePayload(spans: spans, contentLengthLimit: MAX_CONTENT_LENGTH)
-            let req = buildRequest(url: url, data: payload.content)
+            let req = buildRequest(url: url, auth: auth, data: payload.content)
 
             let sem = DispatchSemaphore(value: 0)
 

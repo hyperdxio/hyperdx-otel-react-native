@@ -22,8 +22,8 @@ import { name as appName } from './app.json';
 // export const Rum = SplunkRum.init({
 //   // realm: 'us0',
 //   beaconEndpoint: 'http://192.168.1.136:53820/zipkindump',
-//   applicationName: 'appStartTestAndroid',
-//   rumAccessToken: 'tests',
+//   service: 'appStartTestAndroid',
+//   apiKey: 'tests',
 //   debug: true,
 // });
 

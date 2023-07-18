@@ -31,8 +31,8 @@ import type { ReactNativeConfiguration } from '@splunk/otel-react-native';
 const RumConfig: ReactNativeConfiguration = {
   realm: 'us0',
   // beaconEndpoint: 'http://192.168.1.137:53820/zipkindump',
-  applicationName: 'ReactNativeExample',
-  rumAccessToken: '',
+  service: 'ReactNativeExample',
+  apiKey: '',
   debug: true,
   globalAttributes: {
     globalAttr1: '42',

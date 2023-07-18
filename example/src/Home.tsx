@@ -17,7 +17,7 @@ limitations under the License.
 import React from 'react';
 import { StyleSheet, View, Button } from 'react-native';
 import { trace, context } from '@opentelemetry/api';
-import { SplunkRum } from '@splunk/otel-react-native';
+import { HyperDXRum } from '@hyperdx/otel-react-native';
 
 export default function Home({ navigation }: { navigation: any }) {
   const tracer = trace.getTracer('home');
@@ -71,8 +71,8 @@ export default function Home({ navigation }: { navigation: any }) {
       <Button title="Nested fetch custom span" onPress={createSpan} />
       <Button title="RN fetch GET" onPress={rnFetch} />
       <Button title="Workflow span" onPress={workflowSpan} />
-      <Button title="New session" onPress={SplunkRum._generatenewSessionId} />
-      <Button title="Crash" onPress={SplunkRum._testNativeCrash} />
+      <Button title="New session" onPress={HyperDXRum._generatenewSessionId} />
+      <Button title="Crash" onPress={HyperDXRum._testNativeCrash} />
       <Button title="JS error" onPress={throwError} />
     </View>
   );

@@ -5,12 +5,12 @@
 import {AppRegistry} from 'react-native';
 import App from './App';
 import {name as appName} from './app.json';
-import { SplunkRum } from '@splunk/otel-react-native';
+import {HyperDXRum} from '@hyperdx/otel-react-native';
 
-export const Rum = SplunkRum.init({
+export const Rum = HyperDXRum.init({
   beaconEndpoint: 'https://localhost:53820/zipkindump',
-  applicationName: 'reactNativeTest',
-  rumAccessToken: 'test',
+  service: 'reactNativeTest',
+  apiKey: 'test',
   debug: true,
 });
 

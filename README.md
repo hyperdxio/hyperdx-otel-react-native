@@ -1,4 +1,4 @@
-# Splunk Distribution of OpenTelemetry for React Native
+# HyperDX Distribution of OpenTelemetry for React Native
 
 > :construction: This project is currently **Experimental**. Do not use it in production environments.
 
@@ -15,32 +15,30 @@ To instrument your React Native application, follow these steps.
 
 ```
 # npm
-npm install @splunk/otel-react-native
+npm install @hyperdx/otel-react-native
 
 # yarn
-yarn add @splunk/otel-react-native
+yarn add @hyperdx/otel-react-native
 ```
 
 2. Initialize the library as early in your app lifecycle as possible:
 
 ```js
-import { SplunkRum } from '@splunk/otel-react-native';
+import { HyperDXRum } from '@hyperdx/otel-react-native';
 
-const Rum = SplunkRum.init({
-  realm: 'us0',
-  applicationName: 'reactNativeTest',
-  rumAccessToken: 'token',
+const Rum = HyperDXRum.init({
+  service: 'reactNativeTest',
+  apiKey: 'token',
 });
 
 ```
 
 3. Customize the initialization parameters to specify:
 
-- `realm`: The Splunk Observability Cloud realm of your organization. For example, `us0`.
-- `rumAccessToken`: Your Splunk RUM authentication token. You can find or generate the token [here](https://app.signalfx.com/o11y/#/organization/current?selectedKeyValue=sf_section:accesstokens). Notice that RUM and APM authentication tokens are different.
-- `applicationName`: Name of your application. Set it to distinguish your app from others in Splunk Observability Cloud.
+- `apiKey`: Your HyperDX API key. You can find it [here](https://www.hyperdx.io/team).
+- `service`: Name of your application. Set it to distinguish your app from others in HyperDX.
 
-> If needed, you can set a different target URL by specifying a value for `beaconEndpoint`. Setting a different beacon URL overrides the `realm` setting.
+> If needed, you can set a different target URL by specifying a value for `beaconEndpoint`.
 
 ### Instrument lower versions
 
@@ -93,7 +91,7 @@ module.exports = {
 The following example shows how to instrument navigation:
 
 ```js
-import { startNavigationTracking } from '@splunk/otel-react-native';
+import { startNavigationTracking } from '@hyperdx/otel-react-native';
 
 export default function App() {
   const navigationRef = useNavigationContainerRef();
@@ -126,20 +124,3 @@ Supported features:
 - Capturing native crashes
 
 For more information about how this library uses Opentelemetry and about future plans check [CONTRIBUTING.md](CONTRIBUTING.md#Opentelemetry).
-
-## License
-
-Copyright 2023 Splunk Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing,
-software distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and limitations under the License.
-
->ℹ️&nbsp;&nbsp;SignalFx was acquired by Splunk in October 2019. See [Splunk SignalFx](https://www.splunk.com/en_us/investor-relations/acquisitions/signalfx.html) for more information.

@@ -40,7 +40,7 @@ public class ConfigMapReader extends MapReader {
 
   private interface Keys {
     StringKey BEACON_ENDPOINT = new StringKey("beaconEndpoint");
-    StringKey RUM_ACCESS_TOKEN = new StringKey("rumAccessToken");
+    StringKey RUM_ACCESS_TOKEN = new StringKey("apiKey");
     MapKey GLOBAL_ATTRIBUTES = new MapKey("globalAttributes");
   }
 }
