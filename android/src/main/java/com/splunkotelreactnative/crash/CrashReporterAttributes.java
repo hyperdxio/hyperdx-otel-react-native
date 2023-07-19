@@ -6,7 +6,7 @@ import static io.opentelemetry.api.common.AttributeKey.stringKey;
 
 import io.opentelemetry.api.common.AttributeKey;
 
-// copied from splunk-otel-android HyperDXRum class
+// copied from splunk-otel-android SplunkRum class
 class CrashReporterAttributes {
   static final AttributeKey<String> SPLUNK_OPERATION_KEY = stringKey("_hyperdx_operation");
   static final AttributeKey<Long> STORAGE_SPACE_FREE_KEY = longKey("storage.free");

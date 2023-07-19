@@ -26,19 +26,33 @@ yarn add @hyperdx/otel-react-native
 ```js
 import { HyperDXRum } from '@hyperdx/otel-react-native';
 
-const Rum = HyperDXRum.init({
-  service: 'reactNativeTest',
-  apiKey: 'token',
+HyperDXRum.init({
+  service: 'my-rn-app',
+  apiKey: '<YOUR_API_KEY_HERE>',
+  tracePropagationTargets: [/api.myapp.domain/i], // Set to link traces from frontend to backend requests
 });
-
 ```
 
 3. Customize the initialization parameters to specify:
 
-- `apiKey`: Your HyperDX API key. You can find it [here](https://www.hyperdx.io/team).
+- `apiKey`: Your HyperDX Ingestion API key. You can find it [here](https://www.hyperdx.io/team).
 - `service`: Name of your application. Set it to distinguish your app from others in HyperDX.
+- `tracePropagationTargets`: A list of regular expressions that match the URLs of your backend services. Set it to link traces from frontend to backend requests.
 
-> If needed, you can set a different target URL by specifying a value for `beaconEndpoint`.
+### (Optional) Attach User Information or Metadata
+
+Attaching user information will allow you to search/filter sessions and events in HyperDX. This can be called at any point during the client session. The current client session and all events sent after the call will be associated with the user information.
+
+`userEmail`, `userName`, and `teamName` will populate the sessions UI with the corresponding values, but can be omitted. Any other additional values can be specified and used to search for events.
+
+```js
+HyperDXRum.setGlobalAttributes({
+  userEmail: user.email,
+  userName: user.name,
+  teamName: user.team.name,
+  // Other custom properties...
+});
+```
 
 ### Instrument lower versions
 
@@ -124,3 +138,7 @@ Supported features:
 - Capturing native crashes
 
 For more information about how this library uses Opentelemetry and about future plans check [CONTRIBUTING.md](CONTRIBUTING.md#Opentelemetry).
+
+## License
+
+https://github.com/signalfx/splunk-otel-react-native#license

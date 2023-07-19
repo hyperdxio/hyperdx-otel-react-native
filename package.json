@@ -32,7 +32,8 @@
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "prepare": "bob build",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build",
-    "bootstrap": "npm --prefix example install && npm --prefix example run pods"
+    "bootstrap": "npm --prefix example install && npm --prefix example run pods",
+    "release": "npm install && npx changeset publish && git push --follow-tags"
   },
   "keywords": [
     "react-native",
@@ -47,6 +48,7 @@
     "url": "https://github.com/hyperdxio/hyperdx-otel-react-native/issues"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.26.2",
     "@react-native-community/eslint-config": "^3.0.2",
     "@types/jest": "^28.1.2",
     "@types/react": "~17.0.21",
