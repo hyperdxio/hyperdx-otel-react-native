@@ -31,9 +31,10 @@
     "typescript": "tsc --noEmit",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "prepare": "bob build",
+    "build": "bob build",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build",
     "bootstrap": "npm --prefix example install && npm --prefix example run pods",
-    "release": "npm install && npx changeset publish && git push --follow-tags"
+    "release": "npm run build && npx changeset publish && git push --follow-tags"
   },
   "keywords": [
     "react-native",
