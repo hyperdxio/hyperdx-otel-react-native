@@ -34,7 +34,7 @@ const RumConfig: ReactNativeConfiguration = {
   allowInsecureBeacon: true,
   beaconEndpoint: Config.BEACON_ENDPOINT || 'http://localhost:53820/zipkindump',
   service: 'RnExample',
-  apiKey: '',
+  apiKey: 'superkey-1234',
   debug: true,
   globalAttributes: {
     globalAttr1: '42',
