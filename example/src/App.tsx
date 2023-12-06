@@ -25,11 +25,10 @@ import Details from './Details';
 import {
   OtelWrapper,
   startNavigationTracking,
-} from '@splunk/otel-react-native';
-import type { ReactNativeConfiguration } from '@splunk/otel-react-native';
+} from '@hyperdx/otel-react-native';
+import type { ReactNativeConfiguration } from '@hyperdx/otel-react-native';
 
 const RumConfig: ReactNativeConfiguration = {
-  realm: 'us0',
   // beaconEndpoint: 'http://192.168.1.137:53820/zipkindump',
   service: 'ReactNativeExample',
   apiKey: '',
