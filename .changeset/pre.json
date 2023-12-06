@@ -1,0 +1,10 @@
+{
+  "mode": "pre",
+  "tag": "next",
+  "initialVersions": {
+    "@hyperdx/otel-react-native": "0.1.0"
+  },
+  "changesets": [
+    "hot-dolphins-sparkle"
+  ]
+}
