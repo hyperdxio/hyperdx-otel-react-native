@@ -709,6 +709,7 @@ export function instrumentXHR(config: XhrConfig) {
           this.addEventListener('readystatechange', () => {
             if (this.readyState === XMLHttpRequest.HEADERS_RECEIVED) {
               const headers = this.getAllResponseHeaders().toLowerCase();
+              currentSpan.setAttribute('headers', headers);
               if (headers.indexOf('server-timing') !== -1) {
                 const st = this.getResponseHeader('server-timing');
                 if (st !== null) {
