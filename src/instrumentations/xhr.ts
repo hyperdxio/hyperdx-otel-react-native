@@ -552,6 +552,7 @@ export class XMLHttpRequestInstrumentation {
       );
     }
   }
+  _normalizedHeaders;
 
   enable() {
     this._wrap(XMLHttpRequest.prototype, 'open', this._patchOpen());
@@ -661,6 +662,34 @@ export function instrumentXHR(config: XhrConfig) {
     }
   }
 
+  function _normalizeHeaders(
+    type: string,
+    headersString: string
+  ): { [key: string]: string } {
+    const lines = headersString.trim().split('\n');
+    const normalizedHeaders: { [key: string]: string } = {};
+
+    lines.forEach((line) => {
+      let [key, value] = line.split(/:\s*/);
+      if (key && value) {
+        key = key.replace(/-/g, '_').toLowerCase();
+        const newKey = `http.${type}.header.${key}`;
+        normalizedHeaders[newKey] = value.trim();
+      }
+    });
+
+    return normalizedHeaders;
+  }
+
+  function _setHeaderAttributeForSpan(
+    normalizedHeader: { [key: string]: string },
+    span: api.Span
+  ) {
+    Object.entries(normalizedHeader).forEach(([key, value]) => {
+      span.setAttribute(key, value as api.AttributeValue);
+    });
+  }
+
   XMLHttpRequest.prototype.open = function (this: XMLHttpRequest, ...args) {
     const method = args[0];
     const url = args[1];
@@ -709,7 +738,8 @@ export function instrumentXHR(config: XhrConfig) {
           this.addEventListener('readystatechange', () => {
             if (this.readyState === XMLHttpRequest.HEADERS_RECEIVED) {
               const headers = this.getAllResponseHeaders().toLowerCase();
-              currentSpan.setAttribute('headers', headers);
+              const normalizedHeaders = _normalizeHeaders('response', headers);
+              _setHeaderAttributeForSpan(normalizedHeaders, currentSpan);
               if (headers.indexOf('server-timing') !== -1) {
                 const st = this.getResponseHeader('server-timing');
                 if (st !== null) {
