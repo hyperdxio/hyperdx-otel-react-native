@@ -16,6 +16,7 @@ limitations under the License.
 */
 
 import Foundation
+import DeviceKit
 
 /*
 Copyright 2022 Splunk Inc.
@@ -39,6 +40,7 @@ class SpanToDiskExporter : SpanExporter {
     let maxFileSizeBytes: Int64
     // Count of spans to insert before checking whether truncation is necessary
     let truncationCheckpoint: Int64
+    let deviceModel: String
     private var totalSpansInserted: Int64 = 0
     private var checkpointCounter: Int64 = 0
 
@@ -46,6 +48,7 @@ class SpanToDiskExporter : SpanExporter {
         self.db = spanDb
         self.maxFileSizeBytes = limitDiskUsageMegabytes * 1024 * 1024
         self.truncationCheckpoint = truncationCheckpoint
+        self.deviceModel = Device.current.description
     }
 
     public func shutdown() {}
@@ -63,12 +66,42 @@ class SpanToDiskExporter : SpanExporter {
     public func export(_ zipkinSpans: [ZipkinSpan]) -> Bool {
         let globalAttribs = Globals.getGlobalAttributes()
         let sessionId = Globals.getSessionId()
+        
+        let networkInfo = getNetworkInfo()
 
         for span in zipkinSpans {
             if span.tags["rum.sessionId"] == nil && !sessionId.isEmpty {
                 span.tags["rum.sessionId"] = sessionId
             }
 
+            if span.tags["device.model.name"] == nil {
+                span.tags["device.model.name"] = self.deviceModel
+            }            
+
+            if networkInfo.hostConnectionType != nil {
+                span.tags["net.host.connection.type"] = networkInfo.hostConnectionType!
+            }
+
+            if networkInfo.hostConnectionSubType != nil {
+                span.tags["net.host.connection.subtype"] = networkInfo.hostConnectionSubType!
+            }
+
+            if networkInfo.carrierName != nil {
+                span.tags["net.host.carrier.name"] = networkInfo.carrierName!
+            }
+
+            if networkInfo.carrierCountryCode != nil {
+                span.tags["net.host.carrier.mcc"] = networkInfo.carrierCountryCode!
+            }
+
+            if networkInfo.carrierNetworkCode != nil {
+                span.tags["net.host.carrier.mnc"] = networkInfo.carrierNetworkCode!
+            }
+
+            if networkInfo.carrierIsoCountryCode != nil {
+                span.tags["net.host.carrier.icc"] = networkInfo.carrierIsoCountryCode!
+            }
+            
             for (key, attrib) in globalAttribs {
                 if span.tags[key] == nil {
                     span.tags[key] = attrib
