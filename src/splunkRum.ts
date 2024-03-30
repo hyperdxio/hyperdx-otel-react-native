@@ -154,9 +154,6 @@ export const HyperDXRum: HyperDXRumType = {
     }
 
     addGlobalAttributesFromConf(config);
-    // make sure native crashreporter has correct attributes
-    setGlobalAttributes(nativeSdkConf.globalAttributes);
-
     const provider = new WebTracerProvider({});
     provider.addSpanProcessor(new GlobalAttributeAppender());
     provider.addSpanProcessor(
@@ -194,7 +191,8 @@ export const HyperDXRum: HyperDXRumType = {
           appStartInfo.appStart || appStartInfo.moduleStart;
       }
       setNativeSessionId(getSessionId());
-
+      // make sure native crashreporter has correct attributes
+      setGlobalAttributes({});
       if (config.appStartEnabled) {
         const tracer = provider.getTracer('AppStart');
         const nativeInitEnd = Date.now();
