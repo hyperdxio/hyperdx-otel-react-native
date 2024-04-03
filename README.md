@@ -1,6 +1,6 @@
 # HyperDX Distribution of OpenTelemetry for React Native
 
-> :construction: This project is currently **Experimental**. Do not use it in production environments.
+> :construction: Splunk React Native instrumentation distribution is currently in BETA. By using this package in production-grade environments, users accept all limitations of beta maturity software, including the possibility of breaking changes introduced in any release. Limited support will be provided to active Splunk Observability Cloud customers.
 
 ## Overview
 

@@ -15,7 +15,6 @@ limitations under the License.
 */
 
 import Foundation
-import DeviceKit
 
 // Zipkin conversion code modified from https://github.com/open-telemetry/opentelemetry-swift/blob/main/Sources/Exporters/Zipkin/Implementation/ZipkinConversionExtension.swift
 
@@ -112,6 +111,8 @@ struct ZipkinTransform {
         let spanId = otelSpan["id"] as? String ?? "0000000000000000"
         let name = otelSpan["name"] as? String ?? "unknown"
         let jsTags = otelSpan["tags"] as? Dictionary<String, Any> ?? [:]
+        let timestamp = anyToUInt64(otelSpan["timestamp"])
+        let duration = anyToUInt64(otelSpan["duration"])
 
         var tags: Dictionary<String, String> = [:]
 
@@ -130,15 +131,13 @@ struct ZipkinTransform {
             }
         }
 
-        tags["device.model.name"] = Device.current.description
-
         return ZipkinSpan(traceId: traceId,
                           parentId: parentId,
                           id: spanId,
                           kind: otelSpan["kind"] as? String,
                           name: name,
-                          timestamp: otelSpan["timestamp"] as? UInt64 ?? 0,
-                          duration: otelSpan["duration"] as? UInt64 ?? 0,
+                          timestamp: timestamp,
+                          duration: duration,
                           remoteEndpoint: nil,
                           annotations: [],
                           tags: tags)
@@ -156,5 +155,28 @@ extension ZipkinSpan {
     
     func addEvent(name: String, timestamp: Date) {
         self.annotations.append(ZipkinAnnotation(timestamp: UInt64(timestamp.timeIntervalSince1970 * 1e6), value: name))
+    }
+}
+
+fileprivate func anyToUInt64(_ v: Any?) -> UInt64 {
+    if v == nil {
+        return 0
+    }
+
+    switch v {
+    case is Double:
+        let doubleValue = v as! Double
+        if (doubleValue >= 0.0) {
+            return UInt64(doubleValue)
+        }
+        return 0
+    case is Int:
+        let intValue = v as! Int
+        if (intValue >= 0) {
+            return UInt64(intValue)
+        }
+        return 0
+    default:
+        return 0
     }
 }
