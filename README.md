@@ -70,7 +70,7 @@ module.exports = {
           resolveRequest: null,
         },
         moduleName,
-        platform,
+        platform
       );
 
       if (
@@ -79,7 +79,7 @@ module.exports = {
       ) {
         resolved.filePath = resolved.filePath.replace(
           'platform\\node',
-          'platform\\browser',
+          'platform\\browser'
         );
         return resolved;
       }
@@ -116,9 +116,7 @@ export default function App() {
         startNavigationTracking(navigationRef);
       }}
     >
-      <Stack.Navigator>
-        ...
-      </Stack.Navigator>
+      <Stack.Navigator>...</Stack.Navigator>
     </NavigationContainer>
   );
 }
