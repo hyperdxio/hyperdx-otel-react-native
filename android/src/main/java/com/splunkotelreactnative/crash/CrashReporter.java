@@ -106,7 +106,7 @@ public class CrashReporter {
     String currentSessionId = sessionId;
 
     if (currentSessionId != null) {
-      attributes.put("splunk.rumSessionId", currentSessionId);
+      attributes.put("rum.sessionId", currentSessionId);
     }
 
     Double currentBatteryPercent = runtimeDetailsExtractor.getCurrentBatteryPercent();

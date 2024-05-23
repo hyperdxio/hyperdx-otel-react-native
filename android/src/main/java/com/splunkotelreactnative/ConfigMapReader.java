@@ -52,10 +52,9 @@ public class ConfigMapReader extends MapReader {
 
   private interface Keys {
     StringKey BEACON_ENDPOINT = new StringKey("beaconEndpoint");
-    StringKey RUM_ACCESS_TOKEN = new StringKey("rumAccessToken");
     BooleanKey ENABLE_DISK_BUFFERING = new BooleanKey("enableDiskBuffering");
-
     NumberKey MAX_STORAGE_USE_MB = new NumberKey("limitDiskUsageMegabytes");
+    StringKey RUM_ACCESS_TOKEN = new StringKey("apiKey");
     MapKey GLOBAL_ATTRIBUTES = new MapKey("globalAttributes");
   }
 }

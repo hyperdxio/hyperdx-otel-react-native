@@ -58,7 +58,15 @@ AppState.addEventListener('change', (nextAppState) => {
   currentState = nextAppState;
 });
 
+let isUpdatingSessionId = false;
+
 export function getSessionId() {
+  // In order to prevent infinite loop when newSessionId() logic calls getSessionId(),
+  // don't update session id if it's already being updated.
+  if (isUpdatingSessionId) {
+    return session.id;
+  }
+
   if (hasExpired() || hasTimedOut()) {
     bump();
     newSessionId();
@@ -112,6 +120,7 @@ function hasExpired() {
 }
 
 function newSessionId() {
+  isUpdatingSessionId = true;
   const previousId = session.id;
   session.startTime = Date.now();
   session.id = idGenerator.generateTraceId();
@@ -125,6 +134,7 @@ function newSessionId() {
     },
   });
   span.end();
+  isUpdatingSessionId = false;
 }
 
 export function _generatenewSessionId() {

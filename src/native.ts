@@ -18,7 +18,7 @@ import { NativeModules, Platform } from 'react-native';
 import type { Attributes } from '@opentelemetry/api';
 
 const LINKING_ERROR =
-  `The package 'splunk-otel-react-native' doesn't seem to be linked. Make sure: \n\n` +
+  `The package 'hyperdx-otel-react-native' doesn't seem to be linked. Make sure: \n\n` +
   Platform.select({ ios: "- You have run 'pod install'\n", default: '' }) +
   '- You rebuilt the app after installing the package\n' +
   '- You are not using Expo Go\n';
@@ -36,6 +36,7 @@ const SplunkOtelReactNative = NativeModules.SplunkOtelReactNative
 
 export interface NativeSdKConfiguration {
   beaconEndpoint?: string;
+  apiKey?: string;
   rumAccessToken?: string;
   globalAttributes?: Attributes;
   enableDiskBuffering?: boolean;

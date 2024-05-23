@@ -70,8 +70,8 @@ class SpanToDiskExporter : SpanExporter {
         let networkInfo = getNetworkInfo()
 
         for span in zipkinSpans {
-            if span.tags["splunk.rumSessionId"] == nil && !sessionId.isEmpty {
-                span.tags["splunk.rumSessionId"] = sessionId
+            if span.tags["rum.sessionId"] == nil && !sessionId.isEmpty {
+                span.tags["rum.sessionId"] = sessionId
             }
 
             if span.tags["device.model.name"] == nil {
