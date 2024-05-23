@@ -106,7 +106,7 @@
   "dependencies": {
     "@opentelemetry/api": "^1.7.0",
     "@opentelemetry/core": "1.20.0",
-    "@opentelemetry/instrumentation-xml-http-request": "^0.41.0",
+    "@opentelemetry/instrumentation-xml-http-request": "^0.51.1",
     "@opentelemetry/resources": "1.20.0",
     "@opentelemetry/sdk-trace-base": "1.20.0",
     "@opentelemetry/sdk-trace-web": "1.20.0",

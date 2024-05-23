@@ -52,6 +52,7 @@ export default class ReacNativeSpanExporter implements SpanExporter {
     const spanContext = span.spanContext();
     const nSpan = {
       name: span.name,
+      kind: span.kind,
       tracerName: span.instrumentationLibrary.name,
       startTime: hrTimeToMilliseconds(span.startTime),
       endTime: hrTimeToMilliseconds(span.endTime),

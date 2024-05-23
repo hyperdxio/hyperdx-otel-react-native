@@ -17,6 +17,7 @@ limitations under the License.
 package com.splunkotelreactnative;
 
 import com.facebook.react.bridge.ReadableMap;
+import io.opentelemetry.api.trace.SpanKind;
 
 public class SpanMapReader extends MapReader {
   public final ReadableMap map;
@@ -27,6 +28,11 @@ public class SpanMapReader extends MapReader {
 
   public String getName() {
     return Keys.NAME.get(map);
+  }
+
+  public SpanKind getKind() {
+    int spanKindIndex = Keys.KIND.getLong(map).intValue();
+    return SpanKind.values()[spanKindIndex];
   }
 
   public String getTraceId() {
@@ -59,6 +65,7 @@ public class SpanMapReader extends MapReader {
 
   private interface Keys {
     StringKey NAME = new StringKey("name");
+    NumberKey KIND = new NumberKey("kind");
     StringKey TRACE_ID = new StringKey("traceId");
     NumberKey TRACE_FLAGS = new NumberKey("traceFlags");
     StringKey SPAN_ID = new StringKey("spanId");
