@@ -68,9 +68,11 @@ export function getSessionId() {
   }
 
   if (hasExpired() || hasTimedOut()) {
+    bump();
     newSessionId();
+  } else {
+    bump();
   }
-  bump();
   return session.id;
 }
 

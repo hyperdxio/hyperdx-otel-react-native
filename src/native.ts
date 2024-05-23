@@ -37,7 +37,8 @@ const SplunkOtelReactNative = NativeModules.SplunkOtelReactNative
 export interface NativeSdKConfiguration {
   beaconEndpoint?: string;
   apiKey?: string;
-  globalAttributes?: object;
+  rumAccessToken?: string;
+  globalAttributes?: Attributes;
   enableDiskBuffering?: boolean;
   limitDiskUsageMegabytes?: number;
   truncationCheckpoint?: number;

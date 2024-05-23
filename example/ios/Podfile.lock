@@ -501,6 +501,13 @@ PODS:
     - RCT-Folly (= 2021.07.22.00)
     - React-Core
   - SocketRocket (0.6.1)
+<<<<<<< HEAD
+=======
+  - splunk-otel-react-native (0.3.3):
+    - DeviceKit (~> 4.0)
+    - PLCrashReporter (~> 1.11)
+    - React-Core
+>>>>>>> upstream/release-0.3.4
   - Yoga (1.14.0)
   - YogaKit (1.18.1):
     - Yoga (~> 1.14)
@@ -740,6 +747,10 @@ SPEC CHECKSUMS:
   ReactCommon: 91ece8350ebb3dd2be9cef662abd78b6948233c0
   RNScreens: 3c2d122f5e08c192e254c510b212306da97d2581
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
+<<<<<<< HEAD
+=======
+  splunk-otel-react-native: 1b891cb396b171558f4d998c598e4c6445afe677
+>>>>>>> upstream/release-0.3.4
   Yoga: 86fed2e4d425ee4c6eab3813ba1791101ee153c6
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
