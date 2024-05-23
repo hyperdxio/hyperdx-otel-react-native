@@ -30,6 +30,7 @@ HyperDXRum.init({
   service: 'my-rn-app',
   apiKey: '<YOUR_API_KEY_HERE>',
   tracePropagationTargets: [/api.myapp.domain/i], // Set to link traces from frontend to backend requests
+  networkHeadersCapture: false,
 });
 ```
 
@@ -38,6 +39,7 @@ HyperDXRum.init({
 - `apiKey`: Your HyperDX Ingestion API key. You can find it [here](https://www.hyperdx.io/team).
 - `service`: Name of your application. Set it to distinguish your app from others in HyperDX.
 - `tracePropagationTargets`: A list of regular expressions that match the URLs of your backend services. Set it to link traces from frontend to backend requests.
+- `networkHeadersCapture`: networkHeadersCapture is a flag that allows the option to capture header information, with the default flag being false.
 
 ### (Optional) Attach User Information or Metadata
 
