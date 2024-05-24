@@ -46,6 +46,7 @@ import { Platform } from 'react-native';
 export interface ReactNativeConfiguration {
   beaconEndpoint?: string;
   apiKey: string;
+  networkHeadersCapture?: boolean;
   service: string;
   deploymentEnvironment?: string;
   allowInsecureBeacon?: boolean;
@@ -169,6 +170,7 @@ export const HyperDXRum: HyperDXRumType = {
     instrumentXHR({
       ignoreUrls: config.ignoreUrls,
       propagateTraceHeaderCorsUrls: config.tracePropagationTargets,
+      networkHeadersCapture: config.networkHeadersCapture,
     });
     instrumentErrors();
 

@@ -51,6 +51,7 @@ interface XhrConfig {
   clearTimingResources?: boolean;
   ignoreUrls: Array<string | RegExp> | undefined;
   propagateTraceHeaderCorsUrls?: (string | RegExp)[];
+  networkHeadersCapture?: boolean;
 }
 
 class TaskCounter {
@@ -661,6 +662,34 @@ export function instrumentXHR(config: XhrConfig) {
     }
   }
 
+  function _normalizeHeaders(
+    type: string,
+    headersString: string
+  ): { [key: string]: string } {
+    const lines = headersString.trim().split('\n');
+    const normalizedHeaders: { [key: string]: string } = {};
+
+    lines.forEach((line) => {
+      let [key, value] = line.split(/:\s*/);
+      if (key && value) {
+        key = key.replace(/-/g, '_').toLowerCase();
+        const newKey = `http.${type}.header.${key}`;
+        normalizedHeaders[newKey] = value.trim();
+      }
+    });
+
+    return normalizedHeaders;
+  }
+
+  function _setHeaderAttributeForSpan(
+    normalizedHeader: { [key: string]: string },
+    span: api.Span
+  ) {
+    Object.entries(normalizedHeader).forEach(([key, value]) => {
+      span.setAttribute(key, value as api.AttributeValue);
+    });
+  }
+
   XMLHttpRequest.prototype.open = function (this: XMLHttpRequest, ...args) {
     const method = args[0];
     const url = args[1];
@@ -691,6 +720,13 @@ export function instrumentXHR(config: XhrConfig) {
     _clearResources();
   }
 
+  function _handleHeaderCapture(headers: string, currentSpan: api.Span) {
+    if (config.networkHeadersCapture) {
+      const normalizedHeaders = _normalizeHeaders('response', headers);
+      _setHeaderAttributeForSpan(normalizedHeaders, currentSpan);
+    }
+  }
+
   XMLHttpRequest.prototype.send = function (this: XMLHttpRequest, ...args) {
     const xhrMem = _xhrMem.get(this);
     if (!xhrMem) {
@@ -709,6 +745,7 @@ export function instrumentXHR(config: XhrConfig) {
           this.addEventListener('readystatechange', () => {
             if (this.readyState === XMLHttpRequest.HEADERS_RECEIVED) {
               const headers = this.getAllResponseHeaders().toLowerCase();
+              _handleHeaderCapture(headers, currentSpan);
               if (headers.indexOf('server-timing') !== -1) {
                 const st = this.getResponseHeader('server-timing');
                 if (st !== null) {

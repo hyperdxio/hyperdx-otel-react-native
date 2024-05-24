@@ -231,6 +231,7 @@ public class SplunkOtelReactNativeModule extends ReactContextBaseJavaModule {
 
   private ReactSpanProperties propertiesFromMap(SpanMapReader mapReader) {
     String name = mapReader.getName();
+    SpanKind spanKind = mapReader.getKind();
     Long startEpochMillis = mapReader.getStartEpochMillis();
     Long endEpochMillis = mapReader.getEndEpochMillis();
 
@@ -240,7 +241,7 @@ public class SplunkOtelReactNativeModule extends ReactContextBaseJavaModule {
 
     return new ReactSpanProperties(
       name,
-      SpanKind.INTERNAL,
+      spanKind,
       StatusData.ok(),
       millisToNanos(startEpochMillis),
       millisToNanos(endEpochMillis)
