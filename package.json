@@ -1,6 +1,6 @@
 {
   "name": "@hyperdx/otel-react-native",
-  "version": "0.3.0-next.0",
+  "version": "0.3.0-next.1",
   "description": "HyperDX distribution of Open Telemetry for react native.",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",

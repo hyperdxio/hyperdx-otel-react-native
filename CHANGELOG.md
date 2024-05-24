@@ -1,5 +1,11 @@
 # @hyperdx/otel-react-native
 
+## 0.3.0-next.1
+
+### Minor Changes
+
+- 3870bbc: feat: Capture HTTP headers
+
 ## 0.3.0-next.0
 
 ### Upstream Changes

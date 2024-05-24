@@ -2,9 +2,10 @@
   "mode": "pre",
   "tag": "next",
   "initialVersions": {
-    "@hyperdx/otel-react-native": "0.1.0"
+    "@hyperdx/otel-react-native": "0.3.0-next.0"
   },
   "changesets": [
-    "lemon-spoons-allow"
+    "lemon-spoons-allow",
+    "quiet-drinks-remember"
   ]
 }
