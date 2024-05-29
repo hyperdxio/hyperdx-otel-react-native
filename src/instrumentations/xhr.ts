@@ -52,6 +52,7 @@ interface XhrConfig {
   ignoreUrls: Array<string | RegExp> | undefined;
   propagateTraceHeaderCorsUrls?: (string | RegExp)[];
   networkHeadersCapture?: boolean;
+  networkBodyCapture?: boolean;
 }
 
 class TaskCounter {
@@ -570,6 +571,7 @@ export function instrumentXHROriginal(config: XhrConfig) {
 export function instrumentXHR(config: XhrConfig) {
   const originalOpen = XMLHttpRequest.prototype.open;
   const originalSend = XMLHttpRequest.prototype.send;
+  const originalSetRequestHeader = XMLHttpRequest.prototype.setRequestHeader;
 
   const tracer = api.trace.getTracer('xhr');
   const taskCounter = new TaskCounter();
@@ -727,7 +729,24 @@ export function instrumentXHR(config: XhrConfig) {
     }
   }
 
+  if (config.networkHeadersCapture) {
+    XMLHttpRequest.prototype.setRequestHeader = function (
+      this: XMLHttpRequest,
+      ...args
+    ) {
+      const [key, value] = args;
+      const xhrMem = _xhrMem.get(this);
+      if (xhrMem && key && value) {
+        const newKey = `http.request.header.${key.toLowerCase()}`;
+        xhrMem.span?.setAttribute(newKey, value);
+      }
+      originalSetRequestHeader.apply(this, args);
+    };
+  }
+
   XMLHttpRequest.prototype.send = function (this: XMLHttpRequest, ...args) {
+    const requestBody = args[0];
+
     const xhrMem = _xhrMem.get(this);
     if (!xhrMem) {
       return originalSend.apply(this, args);
@@ -742,6 +761,14 @@ export function instrumentXHR(config: XhrConfig) {
           taskCounter.increment();
           xhrMem.sendStartTime = hrTime();
           currentSpan.addEvent(EventNames.METHOD_SEND);
+          if (config.networkBodyCapture) {
+            currentSpan.setAttribute(
+              'http.request.body',
+              typeof requestBody === 'string'
+                ? requestBody
+                : JSON.stringify(requestBody)
+            );
+          }
           this.addEventListener('readystatechange', () => {
             if (this.readyState === XMLHttpRequest.HEADERS_RECEIVED) {
               const headers = this.getAllResponseHeaders().toLowerCase();
@@ -753,7 +780,28 @@ export function instrumentXHR(config: XhrConfig) {
                 }
               }
             } else if (this.readyState === XMLHttpRequest.DONE) {
-              endSpan(EventNames.EVENT_READY_STATE_CHANGE, this);
+              if (config.networkBodyCapture && this.responseType === 'blob') {
+                try {
+                  new Response(this.response)
+                    .text()
+                    .then((text) => {
+                      currentSpan.setAttribute('http.response.body', text);
+                    })
+                    .finally(() => {
+                      endSpan(EventNames.EVENT_READY_STATE_CHANGE, this);
+                    });
+                } catch (e) {
+                  console.warn('HyperDX:', e);
+                }
+              } else {
+                if (config.networkBodyCapture) {
+                  currentSpan.setAttribute(
+                    'http.response.body',
+                    this.responseText
+                  );
+                }
+                endSpan(EventNames.EVENT_READY_STATE_CHANGE, this);
+              }
             }
           });
           addHeaders(this, spanUrl);

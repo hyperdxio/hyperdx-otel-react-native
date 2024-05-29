@@ -26,7 +26,6 @@ export default class GlobalAttributeAppender implements SpanProcessor {
 
   onStart(span: Span): void {
     span.setAttributes(getGlobalAttributes());
-    span.setAttribute('_hyperdx_operation', span.name);
   }
   shutdown(): Promise<void> {
     return Promise.resolve();
