@@ -47,6 +47,8 @@ import type { PropagateTraceHeaderCorsUrls } from '@opentelemetry/sdk-trace-web/
 
 const parseUrl = (url: string) => new URL(url);
 
+const MAX_BODY_LENGTH = 5 * 1024; // 5KB
+
 interface XhrConfig {
   clearTimingResources?: boolean;
   ignoreUrls: Array<string | RegExp> | undefined;
@@ -762,11 +764,19 @@ export function instrumentXHR(config: XhrConfig) {
           xhrMem.sendStartTime = hrTime();
           currentSpan.addEvent(EventNames.METHOD_SEND);
           if (config.networkBodyCapture) {
+            let body: string = '';
+            if (typeof requestBody === 'string') {
+              body = requestBody;
+            } else {
+              try {
+                body = JSON.stringify(requestBody);
+              } catch (e) {
+                body = '[object of type ' + typeof requestBody + ']';
+              }
+            }
             currentSpan.setAttribute(
               'http.request.body',
-              typeof requestBody === 'string'
-                ? requestBody
-                : JSON.stringify(requestBody)
+              body.slice(0, MAX_BODY_LENGTH)
             );
           }
           this.addEventListener('readystatechange', () => {
