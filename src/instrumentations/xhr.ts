@@ -666,19 +666,34 @@ export function instrumentXHR(config: XhrConfig) {
     }
   }
 
-  function _normalizeHeaders(
-    type: string,
-    headersString: string
-  ): { [key: string]: string } {
+  function _normalizeHeader([key, value]: [string, string]): Record<
+    string,
+    api.AttributeValue
+  > {
+    const normalizedKey = key.toLowerCase().replace(/-/g, '_').trim();
+    let normalizedValue: api.AttributeValue;
+
+    // https://github.com/open-telemetry/opentelemetry-js/blob/82b7526b028a34a23936016768f37df05effcd59/experimental/packages/opentelemetry-instrumentation-http/src/utils.ts#L604C1-L611C1
+    if (typeof value === 'string') {
+      normalizedValue = [value];
+    } else if (Array.isArray(value)) {
+      normalizedValue = value;
+    } else {
+      normalizedValue = [value];
+    }
+    return { [normalizedKey]: normalizedValue };
+  }
+
+  function _normalizeHeaders(headersString: string): {
+    [key: string]: api.AttributeValue;
+  } {
     const lines = headersString.trim().split('\n');
-    const normalizedHeaders: { [key: string]: string } = {};
+    const normalizedHeaders: { [key: string]: api.AttributeValue } = {};
 
     lines.forEach((line) => {
-      let [key, value] = line.split(/:\s*/);
+      let [key, value] = line.trim().split(/:\s*/);
       if (key && value) {
-        key = key.replace(/-/g, '_').toLowerCase();
-        const newKey = `http.${type}.header.${key}`;
-        normalizedHeaders[newKey] = value.trim();
+        Object.assign(normalizedHeaders, _normalizeHeader([key, value]));
       }
     });
 
@@ -686,11 +701,12 @@ export function instrumentXHR(config: XhrConfig) {
   }
 
   function _setHeaderAttributeForSpan(
-    normalizedHeader: { [key: string]: string },
+    normalizedHeaders: { [key: string]: api.AttributeValue },
+    type: 'request' | 'response',
     span: api.Span
   ) {
-    Object.entries(normalizedHeader).forEach(([key, value]) => {
-      span.setAttribute(key, value as api.AttributeValue);
+    Object.entries(normalizedHeaders).forEach(([key, value]) => {
+      span.setAttribute(`http.${type}.header.${key}`, value);
     });
   }
 
@@ -726,8 +742,8 @@ export function instrumentXHR(config: XhrConfig) {
 
   function _handleHeaderCapture(headers: string, currentSpan: api.Span) {
     if (config.networkHeadersCapture) {
-      const normalizedHeaders = _normalizeHeaders('response', headers);
-      _setHeaderAttributeForSpan(normalizedHeaders, currentSpan);
+      const normalizedHeaders = _normalizeHeaders(headers);
+      _setHeaderAttributeForSpan(normalizedHeaders, 'response', currentSpan);
     }
   }
 
@@ -739,8 +755,9 @@ export function instrumentXHR(config: XhrConfig) {
       const [key, value] = args;
       const xhrMem = _xhrMem.get(this);
       if (xhrMem && key && value) {
-        const newKey = `http.request.header.${key.toLowerCase()}`;
-        xhrMem.span?.setAttribute(newKey, value);
+        const normalizedHeader = _normalizeHeader([key, value]);
+        // TODO: Store and dedupe the headers before adding them to the span
+        _setHeaderAttributeForSpan(normalizedHeader, 'request', xhrMem.span);
       }
       originalSetRequestHeader.apply(this, args);
     };
