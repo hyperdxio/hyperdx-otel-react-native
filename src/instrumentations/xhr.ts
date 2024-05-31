@@ -781,18 +781,14 @@ export function instrumentXHR(config: XhrConfig) {
               }
             } else if (this.readyState === XMLHttpRequest.DONE) {
               if (config.networkBodyCapture && this.responseType === 'blob') {
-                try {
-                  new Response(this.response)
-                    .text()
-                    .then((text) => {
-                      currentSpan.setAttribute('http.response.body', text);
-                    })
-                    .finally(() => {
-                      endSpan(EventNames.EVENT_READY_STATE_CHANGE, this);
-                    });
-                } catch (e) {
-                  console.warn('HyperDX:', e);
-                }
+                new Response(this.response)
+                  .text()
+                  .then((text) => {
+                    currentSpan.setAttribute('http.response.body', text);
+                  })
+                  .finally(() => {
+                    endSpan(EventNames.EVENT_READY_STATE_CHANGE, this);
+                  });
               } else {
                 if (config.networkBodyCapture) {
                   currentSpan.setAttribute(
