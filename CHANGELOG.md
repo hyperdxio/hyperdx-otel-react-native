@@ -1,5 +1,11 @@
 # @hyperdx/otel-react-native
 
+## 0.3.0-next.3
+
+### Patch Changes
+
+- 34f54e7: fix: Revert \_hyperdx_operation to fix spans on android
+
 ## 0.3.0-next.2
 
 ### Patch Changes
