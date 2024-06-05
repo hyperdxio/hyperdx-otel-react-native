@@ -1,5 +1,11 @@
 # @hyperdx/otel-react-native
 
+## 0.3.0-next.2
+
+### Patch Changes
+
+- d549200: feat: Capture request headers, request body and response body
+
 ## 0.3.0-next.1
 
 ### Minor Changes
