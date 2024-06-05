@@ -47,7 +47,7 @@ import type { PropagateTraceHeaderCorsUrls } from '@opentelemetry/sdk-trace-web/
 
 const parseUrl = (url: string) => new URL(url);
 
-const MAX_BODY_LENGTH = 5 * 1024; // 5KB
+const MAX_BODY_LENGTH = 2 * 1024 * 1024; // 2MB
 
 interface XhrConfig {
   clearTimingResources?: boolean;
