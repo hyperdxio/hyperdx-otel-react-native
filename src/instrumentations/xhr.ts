@@ -47,11 +47,14 @@ import type { PropagateTraceHeaderCorsUrls } from '@opentelemetry/sdk-trace-web/
 
 const parseUrl = (url: string) => new URL(url);
 
+const MAX_BODY_LENGTH = 2 * 1024 * 1024; // 2MB
+
 interface XhrConfig {
   clearTimingResources?: boolean;
   ignoreUrls: Array<string | RegExp> | undefined;
   propagateTraceHeaderCorsUrls?: (string | RegExp)[];
   networkHeadersCapture?: boolean;
+  networkBodyCapture?: boolean;
 }
 
 class TaskCounter {
@@ -570,6 +573,7 @@ export function instrumentXHROriginal(config: XhrConfig) {
 export function instrumentXHR(config: XhrConfig) {
   const originalOpen = XMLHttpRequest.prototype.open;
   const originalSend = XMLHttpRequest.prototype.send;
+  const originalSetRequestHeader = XMLHttpRequest.prototype.setRequestHeader;
 
   const tracer = api.trace.getTracer('xhr');
   const taskCounter = new TaskCounter();
@@ -662,19 +666,34 @@ export function instrumentXHR(config: XhrConfig) {
     }
   }
 
-  function _normalizeHeaders(
-    type: string,
-    headersString: string
-  ): { [key: string]: string } {
+  function _normalizeHeader([key, value]: [string, string]): Record<
+    string,
+    api.AttributeValue
+  > {
+    const normalizedKey = key.toLowerCase().replace(/-/g, '_').trim();
+    let normalizedValue: api.AttributeValue;
+
+    // https://github.com/open-telemetry/opentelemetry-js/blob/82b7526b028a34a23936016768f37df05effcd59/experimental/packages/opentelemetry-instrumentation-http/src/utils.ts#L604C1-L611C1
+    if (typeof value === 'string') {
+      normalizedValue = [value];
+    } else if (Array.isArray(value)) {
+      normalizedValue = value;
+    } else {
+      normalizedValue = [value];
+    }
+    return { [normalizedKey]: normalizedValue };
+  }
+
+  function _normalizeHeaders(headersString: string): {
+    [key: string]: api.AttributeValue;
+  } {
     const lines = headersString.trim().split('\n');
-    const normalizedHeaders: { [key: string]: string } = {};
+    const normalizedHeaders: { [key: string]: api.AttributeValue } = {};
 
     lines.forEach((line) => {
-      let [key, value] = line.split(/:\s*/);
+      let [key, value] = line.trim().split(/:\s*/);
       if (key && value) {
-        key = key.replace(/-/g, '_').toLowerCase();
-        const newKey = `http.${type}.header.${key}`;
-        normalizedHeaders[newKey] = value.trim();
+        Object.assign(normalizedHeaders, _normalizeHeader([key, value]));
       }
     });
 
@@ -682,11 +701,12 @@ export function instrumentXHR(config: XhrConfig) {
   }
 
   function _setHeaderAttributeForSpan(
-    normalizedHeader: { [key: string]: string },
+    normalizedHeaders: { [key: string]: api.AttributeValue },
+    type: 'request' | 'response',
     span: api.Span
   ) {
-    Object.entries(normalizedHeader).forEach(([key, value]) => {
-      span.setAttribute(key, value as api.AttributeValue);
+    Object.entries(normalizedHeaders).forEach(([key, value]) => {
+      span.setAttribute(`http.${type}.header.${key}`, value);
     });
   }
 
@@ -722,12 +742,30 @@ export function instrumentXHR(config: XhrConfig) {
 
   function _handleHeaderCapture(headers: string, currentSpan: api.Span) {
     if (config.networkHeadersCapture) {
-      const normalizedHeaders = _normalizeHeaders('response', headers);
-      _setHeaderAttributeForSpan(normalizedHeaders, currentSpan);
+      const normalizedHeaders = _normalizeHeaders(headers);
+      _setHeaderAttributeForSpan(normalizedHeaders, 'response', currentSpan);
     }
   }
 
+  if (config.networkHeadersCapture) {
+    XMLHttpRequest.prototype.setRequestHeader = function (
+      this: XMLHttpRequest,
+      ...args
+    ) {
+      const [key, value] = args;
+      const xhrMem = _xhrMem.get(this);
+      if (xhrMem && key && value) {
+        const normalizedHeader = _normalizeHeader([key, value]);
+        // TODO: Store and dedupe the headers before adding them to the span
+        _setHeaderAttributeForSpan(normalizedHeader, 'request', xhrMem.span);
+      }
+      originalSetRequestHeader.apply(this, args);
+    };
+  }
+
   XMLHttpRequest.prototype.send = function (this: XMLHttpRequest, ...args) {
+    const requestBody = args[0];
+
     const xhrMem = _xhrMem.get(this);
     if (!xhrMem) {
       return originalSend.apply(this, args);
@@ -742,6 +780,22 @@ export function instrumentXHR(config: XhrConfig) {
           taskCounter.increment();
           xhrMem.sendStartTime = hrTime();
           currentSpan.addEvent(EventNames.METHOD_SEND);
+          if (config.networkBodyCapture) {
+            let body: string = '';
+            if (typeof requestBody === 'string') {
+              body = requestBody;
+            } else {
+              try {
+                body = JSON.stringify(requestBody);
+              } catch (e) {
+                body = '[object of type ' + typeof requestBody + ']';
+              }
+            }
+            currentSpan.setAttribute(
+              'http.request.body',
+              body.slice(0, MAX_BODY_LENGTH)
+            );
+          }
           this.addEventListener('readystatechange', () => {
             if (this.readyState === XMLHttpRequest.HEADERS_RECEIVED) {
               const headers = this.getAllResponseHeaders().toLowerCase();
@@ -753,7 +807,24 @@ export function instrumentXHR(config: XhrConfig) {
                 }
               }
             } else if (this.readyState === XMLHttpRequest.DONE) {
-              endSpan(EventNames.EVENT_READY_STATE_CHANGE, this);
+              if (config.networkBodyCapture && this.responseType === 'blob') {
+                new Response(this.response)
+                  .text()
+                  .then((text) => {
+                    currentSpan.setAttribute('http.response.body', text);
+                  })
+                  .finally(() => {
+                    endSpan(EventNames.EVENT_READY_STATE_CHANGE, this);
+                  });
+              } else {
+                if (config.networkBodyCapture) {
+                  currentSpan.setAttribute(
+                    'http.response.body',
+                    this.responseText
+                  );
+                }
+                endSpan(EventNames.EVENT_READY_STATE_CHANGE, this);
+              }
             }
           });
           addHeaders(this, spanUrl);
