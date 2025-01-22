@@ -1,5 +1,17 @@
 # @hyperdx/otel-react-native
 
+## 0.3.0
+
+### Minor Changes
+
+- 5a6d22f: chore: merge latest upstream
+- 3870bbc: feat: Capture HTTP headers
+
+### Patch Changes
+
+- d549200: feat: Capture request headers, request body and response body
+- 34f54e7: fix: Revert \_hyperdx_operation to fix spans on android
+
 ## 0.3.0-next.3
 
 ### Patch Changes
