@@ -1,5 +1,17 @@
 # Splunk Distribution of OpenTelemetry for React Native
 
+> **Deprecated:** `@hyperdx/otel-react-native`, HyperDX's fork of this
+> distribution, is no longer maintained, and the ClickStack SDKs do not cover
+> React Native. OpenTelemetry has no official React Native SDK. This package
+> was built on the upstream OpenTelemetry JavaScript packages
+> (`@opentelemetry/sdk-trace-web` and
+> `@opentelemetry/instrumentation-xml-http-request`), which can be set up
+> directly with an OTLP exporter; see
+> [OpenTelemetry JavaScript](https://opentelemetry.io/docs/languages/js/). For
+> native code, use the upstream
+> [Android and iOS SDKs](https://opentelemetry.io/docs/platforms/client-apps/).
+> All of these work with ClickStack over OTLP.
+
 > :construction: Splunk React Native instrumentation distribution is currently in BETA. By using this package in production-grade environments, users accept all limitations of beta maturity software, including the possibility of breaking changes introduced in any release. Limited support will be provided to active Splunk Observability Cloud customers.
 
 ## Overview
